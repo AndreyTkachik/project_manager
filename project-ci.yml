@@ -1,0 +1,44 @@
+image: python:3.9-slim
+
+stages:
+  - tasks
+
+services:
+  - name: postgres:15-alpine
+    alias: postgres
+
+
+variables:
+  POSTGRES_DB: postgres
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: password
+  POSTGRES_HOST_AUTH_METHOD: trust
+
+  DBNAME: postgres
+  DBHOST: postgres
+  DBPORT: 5432
+  DBUSER: postgres
+  DBPASSWORD: postgres
+
+  PROJECT_DIR: ${CI_PROJECT_DIR}
+  SCRIPTS_DIR: ${PROJECT_DIR}/scripts
+  INSERT_DIR: ${PROJECT_DIR}/inserts
+  UTILS_DIR: ${PROJECT_DIR}/utils
+  PYPSQL: ${UTILS_DIR}/pypsql.py
+
+  NO_COLOUR: '\033[0m'
+  LIGHT_RED: '\033[1;31m'
+
+
+.setup:
+  before_script:
+    - pip install -r ${PROJECT_DIR}/requirements.txt > /dev/null 2> /dev/null
+
+
+task 12th:
+  stage: tasks
+  extends:
+    - .setup
+  script:
+    - python3 ${PYPSQL} --file="${SCRIPTS_DIR}/projectmanager_ddl.sql"
+    - python3 ${INSERT_DIR}/inserts.py
